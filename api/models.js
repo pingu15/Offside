@@ -47,7 +47,7 @@ export const goalie_season = {
 
 export const player = {
     name: String,
-    id: String,
+    id: Number,
     seasons: [season],
     position: String,
     shoots: String,
@@ -59,7 +59,7 @@ export const player = {
 
 export const goalie = {
     name: String,
-    id: String,
+    id: Number,
     seasons: [goalie_season],
     position: String,
     shoots: String,

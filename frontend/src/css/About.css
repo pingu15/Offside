@@ -40,6 +40,11 @@
   position: relative;
   width: -moz-fit-content;
   width: fit-content;
+  transition: transform .3s ease;
+}
+
+.webpage .logo:hover {
+  transform: scale(1.1);
 }
 
 .webpage .img {
@@ -86,6 +91,11 @@
   width: -moz-fit-content;
   width: fit-content;
   text-decoration: none;
+  transition: transform .3s ease;
+}
+
+.webpage .div:hover {
+  transform: scale(1.1);
 }
 
 .webpage .markdown {

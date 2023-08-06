@@ -2,6 +2,8 @@ import React, { useEffect, useRef, useState } from "react";
 import "../css/Cards.css";
 import logo from "../images/logo.png";
 import scale from "../images/scale.svg";
+import { STARTING_PLAYER } from "../utils/Constants";
+import { callAPI } from "../utils/Api";
 
 const positions = {
   C: "CENTER",
@@ -20,129 +22,21 @@ export default function Cards(props) {
     }
     window.addEventListener("resize", resize);
   });
-  const calcRank = (stat, name, szn, pos) => {
-    return (
-      100 -
-      Math.round(
-        (props.data.players
-          .filter(
-            (a) =>
-              a.seasonRates.find((season) => season.year === szn) &&
-              a.position === pos
-          )
-          .sort(
-            (a, b) =>
-              b.seasonRates.find((season) => season.year === szn)[stat] -
-              a.seasonRates.find((season) => season.year === szn)[stat]
-          )
-          .findIndex((player) => player.name === name) /
-          props.data.players.filter(
-            (a) =>
-              a.seasonRates.find((season) => season.year === szn) &&
-              a.position === pos
-          ).length) *
-          100
-      )
-    );
-  };
-  const calcReqRank = (stat, name, szn, pos, reqStat, req) => {
-    return (
-      100 -
-      Math.round(
-        (props.data.players
-          .filter(
-            (a) =>
-              a.seasonRates.find((season) => season.year === szn) &&
-              a.position === pos &&
-              a.seasonRates.find((season) => season.year === szn)[reqStat] >=
-                req
-          )
-          .sort(
-            (a, b) =>
-              b.seasonRates.find((season) => season.year === szn)[stat] -
-              a.seasonRates.find((season) => season.year === szn)[stat]
-          )
-          .findIndex((player) => player.name === name) /
-          props.data.players.filter(
-            (a) =>
-              a.seasonRates.find((season) => season.year === szn) &&
-              a.position === pos &&
-              a.seasonRates.find((season) => season.year === szn)[reqStat] >=
-                req
-          ).length) *
-          100
-      )
-    );
-  };
-  const calcRanks = (szn, playerName, pos) => {
-    var season = {
-      year: szn.year,
-      team: szn.team,
-      age: szn.age,
-      gp: szn.gp,
-      toi_all: calcRank("toi_all", playerName, szn.year, pos),
-      evo_gar: calcRank("evo_gar", playerName, szn.year, pos),
-      xevo_gar: calcRank("xevo_gar", playerName, szn.year, pos),
-      evd_gar: calcRank("evd_gar", playerName, szn.year, pos),
-      xevd_gar: calcRank("xevd_gar", playerName, szn.year, pos),
-      ppo_gar:
-        szn.toi_pp >= 30
-          ? calcReqRank("ppo_gar", playerName, szn.year, pos, "toi_pp", 30)
-          : -1,
-      xppo_gar:
-        szn.toi_pp >= 30
-          ? calcReqRank("xppo_gar", playerName, szn.year, pos, "toi_pp", 30)
-          : -1,
-      shd_gar:
-        szn.toi_sh >= 30
-          ? calcReqRank("shd_gar", playerName, szn.year, pos, "toi_sh", 30)
-          : -1,
-      xshd_gar:
-        szn.toi_sh >= 30
-          ? calcReqRank("xshd_gar", playerName, szn.year, pos, "toi_sh", 30)
-          : -1,
-      off_gar: calcRank("off_gar", playerName, szn.year, pos),
-      xoff_gar: calcRank("xoff_gar", playerName, szn.year, pos),
-      def_gar: calcRank("def_gar", playerName, szn.year, pos),
-      xdef_gar: calcRank("xdef_gar", playerName, szn.year, pos),
-      pen_gar: calcRank("pen_gar", playerName, szn.year, pos),
-      tot_gar: calcRank("tot_gar", playerName, szn.year, pos),
-      xtot_gar: calcRank("xtot_gar", playerName, szn.year, pos),
-      goals: calcRank("goals", playerName, szn.year, pos),
-      primary_assists: calcRank("primary_assists", playerName, szn.year, pos),
-      qoc: calcRank("qoc", playerName, szn.year, pos),
-      qot: calcRank("qot", playerName, szn.year, pos),
-      shoot: calcRank("shoot", playerName, szn.year, pos),
-    };
-    return season;
-  };
   const inputRef = useRef(null);
   const yearRef = useRef(null);
-  const [currentYear, setCurrentYear] = useState(props.data.years.at(-1));
-  const [selected, setSelected] = useState(
-    props.data.players.find((player) => player.name === "Sidney Crosby")
+  const [currentYear, setCurrentYear] = useState(
+    props.data.startingPlayer.seasonRanks.at(-1).year
   );
-  const [selectedSeason, setSelectedSeason] = useState(
-    selected.seasonRates.find((season) => season.year === currentYear)
-  );
+  const [selected, setSelected] = useState(props.data.startingPlayer);
   const [focus, setFocus] = useState(false);
   const [searchOptions, setSearchOptions] = useState([selected]);
-  const [ranks, setRanks] = useState(
-    calcRanks(selectedSeason, selected.name, selected.position)
+  const [currentSeason, setCurrentSeason] = useState(
+    props.data.startingPlayer.seasonRanks.at(-1)
   );
   const handleYearChange = (event) => {
     setCurrentYear(event.target.value);
-    setSelectedSeason(
-      selected.seasonRates.find((season) => season.year === event.target.value)
-    );
-    setRanks(
-      calcRanks(
-        selected.seasonRates.find(
-          (season) => season.year === event.target.value
-        ),
-        selected.name,
-        selected.position
-      )
+    setCurrentSeason(
+      selected.seasonRanks.find((szn) => szn.year === event.target.value)
     );
   };
   const handleNameChange = (event) => {
@@ -153,41 +47,23 @@ export default function Cards(props) {
       )
     );
   };
-  const handleSelect = (index) => {
-    if (
-      searchOptions[index].seasonRates.find(
-        (season) => season.year === currentYear
-      )
-    ) {
-      setSelected(searchOptions[index]);
-      setSelectedSeason(
-        searchOptions[index].seasonRates.find(
-          (season) => season.year === currentYear
-        )
-      );
-      setRanks(
-        calcRanks(
-          searchOptions[index].seasonRates.find(
-            (season) => season.year === currentYear
-          ),
-          searchOptions[index].name,
-          searchOptions[index].position
-        )
+  const handleSelect = async (index) => {
+    let player = {};
+    await callAPI(`/player/ranks/${searchOptions[index].id}`).then((res) => {
+      player = res;
+    });
+    if (player.seasonRanks.find((season) => season.year === currentYear)) {
+      setSelected(player);
+      setCurrentSeason(
+        player.seasonRanks.find((season) => season.year === currentYear)
       );
     } else {
-      setSelected(searchOptions[index]);
-      setSelectedSeason(searchOptions[index].seasonRates.at(-1));
-      setCurrentYear(searchOptions[index].seasonRates.at(-1).year);
-      setRanks(
-        calcRanks(
-          searchOptions[index].seasonRates.at(-1),
-          searchOptions[index].name,
-          searchOptions[index].position
-        )
-      );
-      yearRef.current.value = searchOptions[index].seasonRates.at(-1).year;
+      setSelected(player);
+      setCurrentSeason(player.seasonRanks.at(-1));
+      setCurrentYear(player.seasonRanks.at(-1).year);
+      yearRef.current.value = player.seasonRanks.at(-1).year;
     }
-    inputRef.current.value = searchOptions[index].name;
+    inputRef.current.value = player.name;
     inputRef.current.blur();
   };
   const calcRed = (val) => {
@@ -202,15 +78,11 @@ export default function Cards(props) {
   const prev = (stat, yr) => {
     let idx = props.data.years.findIndex((year) => year === currentYear);
     if (idx < yr) return "";
-    let szn = props.data.players
-      .find((player) => player.name === selected.name)
-      .seasonRates.find((season) => season.year === props.data.years[idx - yr]);
-    if (!szn) return "";
-    console.log("year: " + szn.year);
-    return (
-      (yr === 2 ? "45," : "195,") +
-      (248 - calcRank(stat, selected.name, szn.year, selected.position) * 2.4)
+    let szn = selected.seasonRanks.find(
+      (season) => season.year === props.data.years[idx - yr]
     );
+    if (!szn) return "";
+    return (yr === 2 ? "45," : "195,") + (248 - szn[stat] * 2.4);
   };
   const getYear = (yr) => {
     let idx = props.data.years.findIndex((year) => year === currentYear);
@@ -220,9 +92,9 @@ export default function Cards(props) {
   return (
     <div ref={ref} className="webpage">
       <div className="top-bar">
-        <div className="logo">
+        <a className="logo" href="">
           <img className="img" alt="Logo" src={logo} />
-        </div>
+        </a>
         <div className="nav-bar">
           <div className="menu">
             <a href="cards" className="div">
@@ -285,7 +157,7 @@ export default function Cards(props) {
               value={currentYear}
               ref={yearRef}
             >
-              {selected.seasons
+              {selected.seasonRanks
                 .map((szn) => szn.year)
                 .map((year) => {
                   return (
@@ -311,22 +183,20 @@ export default function Cards(props) {
                 <div className="div-wrapper">
                   <div className="text-wrapper-3">{selected.name}</div>
                 </div>
-                <div className="text-wrapper-4">
-                  TEAM: {selectedSeason.team}
-                </div>
+                <div className="text-wrapper-4">TEAM: {currentSeason.team}</div>
               </div>
               <div className="ovr">
                 <div
                   className="ovr-2"
                   style={{
                     backgroundColor: `rgb(${calcRed(
-                      ranks.tot_gar
-                    )}, ${calcGreen(ranks.tot_gar)}, ${calcBlue(
-                      ranks.tot_gar
+                      currentSeason.tot_gar
+                    )}, ${calcGreen(currentSeason.tot_gar)}, ${calcBlue(
+                      currentSeason.tot_gar
                     )})`,
                   }}
                 />
-                <div className="text-wrapper-5">{ranks.tot_gar}</div>
+                <div className="text-wrapper-5">{currentSeason.tot_gar}</div>
               </div>
             </div>
           </div>
@@ -334,11 +204,11 @@ export default function Cards(props) {
             <div className="text-wrapper-6">
               POS: {positions[selected.position]}
             </div>
-            <div className="text-wrapper-7">AGE: {selectedSeason.age} YRS</div>
+            <div className="text-wrapper-7">AGE: {currentSeason.age} YRS</div>
             <div className="text-wrapper-7">
               DRAFT: {selected.draft_round === -1 ? "N/A" : selected.draft_year}
             </div>
-            <div className="text-wrapper-7">GP: {selectedSeason.gp}</div>
+            <div className="text-wrapper-7">GP: {currentSeason.gp}</div>
             <div className="text-wrapper-8">OVR</div>
           </div>
           <div className="data">
@@ -348,50 +218,52 @@ export default function Cards(props) {
                   className="rectangle"
                   style={{
                     backgroundColor: `rgb(${calcRed(
-                      ranks.xevd_gar
-                    )}, ${calcGreen(ranks.xevd_gar)}, ${calcBlue(
-                      ranks.xevd_gar
+                      currentSeason.xevd_gar
+                    )}, ${calcGreen(currentSeason.xevd_gar)}, ${calcBlue(
+                      currentSeason.xevd_gar
                     )})`,
                   }}
                 >
-                  {ranks.xevd_gar}
+                  {currentSeason.xevd_gar}
                 </div>
                 <div
                   className="rectangle-2"
                   id="shoot"
                   style={{
-                    backgroundColor: `rgb(${calcRed(ranks.shoot)}, ${calcGreen(
-                      ranks.shoot
-                    )}, ${calcBlue(ranks.shoot)})`,
+                    backgroundColor: `rgb(${calcRed(
+                      currentSeason.shoot
+                    )}, ${calcGreen(currentSeason.shoot)}, ${calcBlue(
+                      currentSeason.shoot
+                    )})`,
                   }}
                 >
-                  {ranks.shoot}
+                  {currentSeason.shoot}
                 </div>
                 <div
                   className="rectangle-3"
                   id="xevo_gar"
                   style={{
                     backgroundColor: `rgb(${calcRed(
-                      ranks.xevo_gar
-                    )}, ${calcGreen(ranks.xevo_gar)}, ${calcBlue(
-                      ranks.xevo_gar
+                      currentSeason.xevo_gar
+                    )}, ${calcGreen(currentSeason.xevo_gar)}, ${calcBlue(
+                      currentSeason.xevo_gar
                     )})`,
                   }}
                 >
-                  {ranks.xevo_gar}
+                  {currentSeason.xevo_gar}
                 </div>
                 <div
                   className="rectangle-4"
                   id="xtot_gar"
                   style={{
                     backgroundColor: `rgb(${calcRed(
-                      ranks.xtot_gar
-                    )}, ${calcGreen(ranks.xtot_gar)}, ${calcBlue(
-                      ranks.xtot_gar
+                      currentSeason.xtot_gar
+                    )}, ${calcGreen(currentSeason.xtot_gar)}, ${calcBlue(
+                      currentSeason.xtot_gar
                     )})`,
                   }}
                 >
-                  {ranks.xtot_gar}
+                  {currentSeason.xtot_gar}
                 </div>
               </div>
               <div className="label-wrapper">
@@ -407,51 +279,57 @@ export default function Cards(props) {
                   className="rectangle"
                   id="goals"
                   style={{
-                    backgroundColor: `rgb(${calcRed(ranks.goals)}, ${calcGreen(
-                      ranks.goals
-                    )}, ${calcBlue(ranks.goals)})`,
+                    backgroundColor: `rgb(${calcRed(
+                      currentSeason.goals
+                    )}, ${calcGreen(currentSeason.goals)}, ${calcBlue(
+                      currentSeason.goals
+                    )})`,
                   }}
                 >
-                  {ranks.goals}
+                  {currentSeason.goals}
                 </div>
                 <div
                   className="rectangle-2"
                   id="primary_assists"
                   style={{
                     backgroundColor: `rgb(${calcRed(
-                      ranks.primary_assists
-                    )}, ${calcGreen(ranks.primary_assists)}, ${calcBlue(
-                      ranks.primary_assists
+                      currentSeason.primary_assists
+                    )}, ${calcGreen(currentSeason.primary_assists)}, ${calcBlue(
+                      currentSeason.primary_assists
                     )})`,
                   }}
                 >
-                  {ranks.primary_assists}
+                  {currentSeason.primary_assists}
                 </div>
                 <div
                   className="rectangle-3"
                   id="xshd_gar"
                   style={{
                     backgroundColor: `rgb(${calcRed(
-                      ranks.xshd_gar
-                    )}, ${calcGreen(ranks.xshd_gar)}, ${calcBlue(
-                      ranks.xshd_gar
+                      currentSeason.xshd_gar
+                    )}, ${calcGreen(currentSeason.xshd_gar)}, ${calcBlue(
+                      currentSeason.xshd_gar
                     )})`,
                   }}
                 >
-                  {ranks.xshd_gar === -1 ? "--" : ranks.xshd_gar}
+                  {currentSeason.xshd_gar === -1
+                    ? "--"
+                    : currentSeason.xshd_gar}
                 </div>
                 <div
                   className="rectangle-4"
                   id="xppo_gar"
                   style={{
                     backgroundColor: `rgb(${calcRed(
-                      ranks.xppo_gar
-                    )}, ${calcGreen(ranks.xppo_gar)}, ${calcBlue(
-                      ranks.xppo_gar
+                      currentSeason.xppo_gar
+                    )}, ${calcGreen(currentSeason.xppo_gar)}, ${calcBlue(
+                      currentSeason.xppo_gar
                     )})`,
                   }}
                 >
-                  {ranks.xppo_gar === -1 ? "--" : ranks.xppo_gar}
+                  {currentSeason.xppo_gar === -1
+                    ? "--"
+                    : currentSeason.xppo_gar}
                 </div>
               </div>
               <div className="group-3">
@@ -467,49 +345,53 @@ export default function Cards(props) {
                   className="rectangle"
                   id="qoc"
                   style={{
-                    backgroundColor: `rgb(${calcRed(ranks.qoc)}, ${calcGreen(
-                      ranks.qoc
-                    )}, ${calcBlue(ranks.qoc)})`,
+                    backgroundColor: `rgb(${calcRed(
+                      currentSeason.qoc
+                    )}, ${calcGreen(currentSeason.qoc)}, ${calcBlue(
+                      currentSeason.qoc
+                    )})`,
                   }}
                 >
-                  {ranks.qoc}
+                  {currentSeason.qoc}
                 </div>
                 <div
                   className="rectangle-2"
                   id="qot"
                   style={{
-                    backgroundColor: `rgb(${calcRed(ranks.qot)}, ${calcGreen(
-                      ranks.qot
-                    )}, ${calcBlue(ranks.qot)})`,
+                    backgroundColor: `rgb(${calcRed(
+                      currentSeason.qot
+                    )}, ${calcGreen(currentSeason.qot)}, ${calcBlue(
+                      currentSeason.qot
+                    )})`,
                   }}
                 >
-                  {ranks.qot}
+                  {currentSeason.qot}
                 </div>
                 <div
                   className="rectangle-3"
                   id="toi_all"
                   style={{
                     backgroundColor: `rgb(${calcRed(
-                      ranks.toi_all
-                    )}, ${calcGreen(ranks.toi_all)}, ${calcBlue(
-                      ranks.toi_all
+                      currentSeason.toi_all
+                    )}, ${calcGreen(currentSeason.toi_all)}, ${calcBlue(
+                      currentSeason.toi_all
                     )})`,
                   }}
                 >
-                  {ranks.toi_all}
+                  {currentSeason.toi_all}
                 </div>
                 <div
                   className="rectangle-4"
                   id="pen_gar"
                   style={{
                     backgroundColor: `rgb(${calcRed(
-                      ranks.pen_gar
-                    )}, ${calcGreen(ranks.pen_gar)}, ${calcBlue(
-                      ranks.pen_gar
+                      currentSeason.pen_gar
+                    )}, ${calcGreen(currentSeason.pen_gar)}, ${calcBlue(
+                      currentSeason.pen_gar
                     )})`,
                   }}
                 >
-                  {ranks.pen_gar}
+                  {currentSeason.pen_gar}
                 </div>
               </div>
               <div className="group-5">
@@ -540,16 +422,16 @@ export default function Cards(props) {
                       <polyline
                         style={{ stroke: "#00BC29" }}
                         points={`${prev("shoot", 2)} ${prev("shoot", 1)} 345, ${
-                          248 - ranks.shoot * 2.4
-                        } 345, ${248 - ranks.shoot * 2.4}`}
+                          248 - currentSeason.shoot * 2.4
+                        } 345, ${248 - currentSeason.shoot * 2.4}`}
                       ></polyline>
                       <polyline
                         style={{ stroke: "#E73F76" }}
                         points={`${prev("xdef_gar", 2)} ${prev(
                           "xdef_gar",
                           1
-                        )} 345, ${248 - ranks.xdef_gar * 2.4}  345, ${
-                          248 - ranks.xdef_gar * 2.4
+                        )} 345, ${248 - currentSeason.xdef_gar * 2.4}  345, ${
+                          248 - currentSeason.xdef_gar * 2.4
                         }`}
                       ></polyline>
                       <polyline
@@ -557,8 +439,8 @@ export default function Cards(props) {
                         points={`${prev("xoff_gar", 2)} ${prev(
                           "xoff_gar",
                           1
-                        )} 345, ${248 - ranks.xoff_gar * 2.4} 345, ${
-                          248 - ranks.xoff_gar * 2.4
+                        )} 345, ${248 - currentSeason.xoff_gar * 2.4} 345, ${
+                          248 - currentSeason.xoff_gar * 2.4
                         }`}
                       ></polyline>
                     </svg>

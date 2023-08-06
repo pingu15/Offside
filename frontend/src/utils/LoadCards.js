@@ -1,7 +1,7 @@
-import { to60 } from "./Converter";
 import { callAPI } from "./Api";
 import { useState } from "react";
 import Cards from "../screens/Cards";
+import { STARTING_PLAYER } from "../utils/Constants";
 
 let data = {};
 
@@ -12,15 +12,9 @@ export default function LoadCards() {
     });
     await callAPI("/players").then((res) => {
       data.players = res;
-      data.players.forEach((player) => {
-        player.seasonRates = [];
-        player.seasons.forEach((season) => {
-          player.seasonRates.push(to60(season));
-        });
-      });
     });
-    await callAPI("/goalies").then((res) => {
-      data.goalies = res;
+    await callAPI(`/player/ranks/${STARTING_PLAYER.id}`).then((res) => {
+      data.startingPlayer = res;
     });
   };
 

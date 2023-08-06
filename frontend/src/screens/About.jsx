@@ -22,9 +22,9 @@ export default function About() {
   return (
     <div className="webpage" ref={ref}>
       <div className="top-bar">
-        <div className="logo">
-          <img className="img" alt="Logo" src={logo} />
-        </div>
+        <a className="logo" href="">
+          <img className="img" alt="Logo" src={logo}/>
+        </a>
         <div className="nav-bar">
           <div className="menu">
             <a href="cards" className="div">

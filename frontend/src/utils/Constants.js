@@ -1,0 +1,1 @@
+export const STARTING_PLAYER = {id: 8471675, name: "Sidney Crosby"};
