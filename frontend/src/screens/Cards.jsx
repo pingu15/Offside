@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from "react";
 import "../css/Cards.css";
 import logo from "../images/logo.png";
 import scale from "../images/scale.svg";
-import { STARTING_PLAYER } from "../utils/Constants";
 import { callAPI } from "../utils/Api";
 
 const positions = {
@@ -92,7 +91,7 @@ export default function Cards(props) {
   return (
     <div ref={ref} className="webpage">
       <div className="top-bar">
-        <a className="logo" href="">
+        <a className="logo" href="/">
           <img className="img" alt="Logo" src={logo} />
         </a>
         <div className="nav-bar">
