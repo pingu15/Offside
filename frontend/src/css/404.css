@@ -1,0 +1,130 @@
+@font-face {
+  font-family: "Work Sans";
+  src: url("../fonts/WorkSans-VariableFont_wght.ttf");
+}
+
+::-webkit-scrollbar {
+  display: none;
+}
+
+.webpage {
+  align-items: center;
+  background-color: #ffffff;
+  border: 1px none;
+  display: flex;
+  flex-direction: column;
+  height: 1080px;
+  min-width: 1920px;
+  padding: 10px 0px;
+  position: relative;
+  transform-origin: 0 0;
+}
+
+.webpage .top-bar {
+  align-items: center;
+  align-self: stretch;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-color: #eae8f3;
+  display: flex;
+  position: relative;
+}
+
+.webpage .logo {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  height: 100px;
+  justify-content: center;
+  padding: 0px 0px 0px 60px;
+  position: relative;
+  width: -moz-fit-content;
+  width: fit-content;
+  transition: transform .3s ease;
+}
+
+.webpage .logo:hover {
+  transform: scale(1.1);
+}
+
+.webpage .img {
+  height: 60px;
+  min-width: 60px;
+  object-fit: cover;
+  position: relative;
+}
+
+.webpage .nav-bar {
+  align-items: center;
+  display: flex;
+  flex: 1;
+  gap: 10px;
+  height: 100px;
+  justify-content: center;
+  padding: 10px 120px 10px 0px;
+  position: relative;
+}
+
+.webpage .menu {
+  align-items: center;
+  align-self: stretch;
+  display: flex;
+  gap: 140px;
+  justify-content: center;
+  padding: 36px 0px;
+  position: relative;
+  width: -moz-fit-content;
+  width: fit-content;
+}
+
+.webpage .div {
+  color: #000000;
+  font-family: "Work Sans", Helvetica;
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: 0;
+  line-height: normal;
+  margin-bottom: -11.5px;
+  margin-top: -13.5px;
+  position: relative;
+  white-space: nowrap;
+  width: -moz-fit-content;
+  width: fit-content;
+  text-decoration: none;
+  transition: all .3s ease;
+}
+
+.webpage .div:hover {
+  transform: scale(1.1);
+}
+
+.webpage .message {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  justify-content: center;
+  position: absolute;
+  top: 200px;
+  color: #000000;
+  font-family: "Work Sans", Helvetica;
+  font-size: 45px;
+  font-weight: 500;
+  letter-spacing: 1.1px;
+  line-height: 95px;
+  margin-top: -1px;
+  position: relative;
+  white-space: nowrap;
+  width: -moz-fit-content;
+  width: fit-content;
+}
+
+.webpage .notFound {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  justify-content: center;
+  position: absolute;
+  top: 450px;
+}
