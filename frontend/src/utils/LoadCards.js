@@ -2,6 +2,7 @@ import { callAPI } from "./Api";
 import { useState } from "react";
 import Cards from "../screens/Cards";
 import { STARTING_PLAYER } from "../utils/Constants";
+import Loading from "../screens/Loading";
 
 let data = {};
 
@@ -26,11 +27,5 @@ export default function LoadCards() {
     });
   }
 
-  return isLoading ? (
-    <></>
-  ) : (
-    <>
-      <Cards data={data} />
-    </>
-  );
+  return isLoading ? <Loading /> : <Cards data={data} />;
 }

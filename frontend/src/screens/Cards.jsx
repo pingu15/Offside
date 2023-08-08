@@ -62,6 +62,7 @@ export default function Cards(props) {
       setCurrentYear(player.seasonRanks.at(-1).year);
       yearRef.current.value = player.seasonRanks.at(-1).year;
     }
+    setSearchOptions([{ id: player.id, name: player.name }]);
     inputRef.current.value = player.name;
     inputRef.current.blur();
   };
