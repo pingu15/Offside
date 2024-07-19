@@ -174,7 +174,7 @@ export default function Cards(props) {
             <div
               className="pic"
               style={{
-                backgroundImage: `url(https://cms.nhl.bamgrid.com/images/headshots/current/168x168/${selected.id}.jpg)`,
+                backgroundImage: `url(https://assets.nhle.com/mugs/nhl/20${currentYear.substring(0, 2)}20${currentYear.substring(3)}/${currentSeason.team}/${selected.id}.png)`,
                 backgroundSize: "100px 100px",
               }}
             />
